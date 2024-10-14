@@ -18,8 +18,8 @@ namespace Server.Mobiles
         //private readonly List<SBInfo> m_SBInfos = new List<SBInfo>();
 
         [Constructable]
-        public SRBankerBanker()
-            : base("the banker")
+        public SRBanker()
+            : base()
         { 
             this.Name = "Pharyn";
         }
@@ -28,7 +28,7 @@ namespace Server.Mobiles
             : base(serial)
         { }
 
-        public override NpcGuild NpcGuild { get { return NpcGuild.MerchantsGuild; } }
+        // public override NpcGuild NpcGuild { get { return NpcGuild.MerchantsGuild; } }
 
 /*
         protected override List<SBInfo> SBInfos { get { return m_SBInfos; } }
