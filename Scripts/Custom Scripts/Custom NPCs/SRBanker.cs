@@ -15,7 +15,7 @@ namespace Server.Mobiles
 {
     public class SRBanker : Banker
     {
-        //private readonly List<SBInfo> m_SBInfos = new List<SBInfo>();
+        private readonly List<SBInfo> m_SBInfos = new List<SBInfo>();
 
         [Constructable]
         public SRBanker()
@@ -28,275 +28,17 @@ namespace Server.Mobiles
             : base(serial)
         { }
 
-        // public override NpcGuild NpcGuild { get { return NpcGuild.MerchantsGuild; } }
+        public override NpcGuild NpcGuild { get { return NpcGuild.MerchantsGuild; } }
 
-/*
+
         protected override List<SBInfo> SBInfos { get { return m_SBInfos; } }
-
-        public static int GetBalance(Mobile m)
-        {
-            double balance = 0;
-
-			if (AccountGold.Enabled && m.Account != null)
-            {
-                int goldStub;
-                m.Account.GetGoldBalance(out goldStub, out balance);
-
-                if (balance > Int32.MaxValue)
-                {
-                    return Int32.MaxValue;
-                }
-            }
-
-			Container bank = m.Player ? m.BankBox : m.FindBankNoCreate();
-
-            if (bank != null)
-            {
-                var gold = bank.FindItemsByType<Gold>();
-                var checks = bank.FindItemsByType<BankCheck>();
-
-                balance += gold.Aggregate(0.0, (c, t) => c + t.Amount);
-                balance += checks.Aggregate(0.0, (c, t) => c + t.Worth);
-            }
-
-            return (int)Math.Max(0, Math.Min(Int32.MaxValue, balance));
-        }
-
-        public static int GetBalance(Mobile m, out Item[] gold, out Item[] checks)
-        {
-            double balance = 0;
-
-			if (AccountGold.Enabled && m.Account != null)
-            {
-                int goldStub;
-                m.Account.GetGoldBalance(out goldStub, out balance);
-
-                if (balance > Int32.MaxValue)
-                {
-                    gold = checks = new Item[0];
-                    return Int32.MaxValue;
-                }
-            }
-
-			Container bank = m.Player ? m.BankBox : m.FindBankNoCreate();
-
-            if (bank != null)
-            {
-                gold = bank.FindItemsByType(typeof(Gold));
-                checks = bank.FindItemsByType(typeof(BankCheck));
-
-                balance += gold.OfType<Gold>().Aggregate(0.0, (c, t) => c + t.Amount);
-                balance += checks.OfType<BankCheck>().Aggregate(0.0, (c, t) => c + t.Worth);
-            }
-            else
-            {
-                gold = checks = new Item[0];
-            }
-
-            return (int)Math.Max(0, Math.Min(Int32.MaxValue, balance));
-        }
-
-        public static bool Withdraw(Mobile from, int amount, bool message = false)
-        {
-            // If for whatever reason the TOL checks fail, we should still try old methods for withdrawing currency.
-			if (AccountGold.Enabled && from.Account != null && from.Account.WithdrawGold(amount))
-            {
-                if (message)
-                    from.SendLocalizedMessage(1155856, amount.ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("en-US"))); // ~1_AMOUNT~ gold has been removed from your bank box.
-
-                return true;
-            }
-
-            Item[] gold, checks;
-            var balance = GetBalance(from, out gold, out checks);
-
-            if (balance < amount)
-            {
-                return false;
-            }
-
-            for (var i = 0; amount > 0 && i < gold.Length; ++i)
-            {
-                if (gold[i].Amount <= amount)
-                {
-                    amount -= gold[i].Amount;
-                    gold[i].Delete();
-                }
-                else
-                {
-                    gold[i].Amount -= amount;
-                    amount = 0;
-                }
-            }
-
-            for (var i = 0; amount > 0 && i < checks.Length; ++i)
-            {
-                var check = (BankCheck)checks[i];
-
-                if (check.Worth <= amount)
-                {
-                    amount -= check.Worth;
-                    check.Delete();
-                }
-                else
-                {
-                    check.Worth -= amount;
-                    amount = 0;
-                }
-            }
-
-            if (message)
-                from.SendLocalizedMessage(1155856, amount.ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("en-US"))); // ~1_AMOUNT~ gold has been removed from your bank box.
-
-            return true;
-        }
-
-        public static bool Deposit(Mobile from, int amount, bool message = false)
-        {
-            // If for whatever reason the TOL checks fail, we should still try old methods for depositing currency.
-			if (AccountGold.Enabled && from.Account != null && from.Account.DepositGold(amount))
-            {
-                if (message)
-                    from.SendLocalizedMessage(1042763, amount.ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("en-US"))); // ~1_AMOUNT~ gold was deposited in your account.
-
-                return true;
-            }
-
-			var box = from.Player ? from.BankBox : from.FindBankNoCreate();
-
-            if (box == null)
-            {
-                return false;
-            }
-
-            var items = new List<Item>();
-
-            while (amount > 0)
-            {
-                Item item;
-                if (amount < 5000)
-                {
-                    item = new Gold(amount);
-                    amount = 0;
-                }
-                else if (amount <= 1000000)
-                {
-                    item = new BankCheck(amount);
-                    amount = 0;
-                }
-                else
-                {
-                    item = new BankCheck(1000000);
-                    amount -= 1000000;
-                }
-
-                if (box.TryDropItem(from, item, false))
-                {
-                    items.Add(item);
-                }
-                else
-                {
-                    item.Delete();
-                    foreach (var curItem in items)
-                    {
-                        curItem.Delete();
-                    }
-
-                    return false;
-                }
-            }
-
-            if (message)
-                from.SendLocalizedMessage(1042763, amount.ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("en-US"))); // ~1_AMOUNT~ gold was deposited in your account.
-
-            return true;
-        }
-
-        public static int DepositUpTo(Mobile from, int amount, bool message = false)
-        {
-            // If for whatever reason the TOL checks fail, we should still try old methods for depositing currency.
-			if (AccountGold.Enabled && from.Account != null && from.Account.DepositGold(amount))
-            {
-                if (message)
-                    from.SendLocalizedMessage(1042763, amount.ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("en-US"))); // ~1_AMOUNT~ gold was deposited in your account.
-
-                return amount;
-            }
-
-			var box = from.Player ? from.BankBox : from.FindBankNoCreate();
-
-            if (box == null)
-            {
-                return 0;
-            }
-
-            var amountLeft = amount;
-            while (amountLeft > 0)
-            {
-                Item item;
-                int amountGiven;
-
-                if (amountLeft < 5000)
-                {
-                    item = new Gold(amountLeft);
-                    amountGiven = amountLeft;
-                }
-                else if (amountLeft <= 1000000)
-                {
-                    item = new BankCheck(amountLeft);
-                    amountGiven = amountLeft;
-                }
-                else
-                {
-                    item = new BankCheck(1000000);
-                    amountGiven = 1000000;
-                }
-
-                if (box.TryDropItem(from, item, false))
-                {
-                    amountLeft -= amountGiven;
-                }
-                else
-                {
-                    item.Delete();
-                    break;
-                }
-            }
-
-            return amount - amountLeft;
-        }
-
-        public static void Deposit(Container cont, int amount)
-        {
-            while (amount > 0)
-            {
-                Item item;
-
-                if (amount < 5000)
-                {
-                    item = new Gold(amount);
-                    amount = 0;
-                }
-                else if (amount <= 1000000)
-                {
-                    item = new BankCheck(amount);
-                    amount = 0;
-                }
-                else
-                {
-                    item = new BankCheck(1000000);
-                    amount -= 1000000;
-                }
-
-                cont.DropItem(item);
-            }
-        }
 
         public override void InitSBInfo()
         {
             m_SBInfos.Add(new SBBanker());
         }
 
+#region Speech Handlers
         public override bool HandlesOnSpeech(Mobile from)
         {
             if (from.InRange(Location, 12))
@@ -331,12 +73,14 @@ namespace Server.Mobiles
 							{
 								e.Handled = true;
 
-								if (e.Mobile.Criminal)
+								/* Disabling Criminal status check
+                                if (e.Mobile.Criminal)
 								{
 									// I will not do business with a criminal!
 									vendor.Say(500389);
 									break;
 								}
+                                */
 
 								var split = e.Speech.Split(' ');
 
@@ -386,12 +130,14 @@ namespace Server.Mobiles
 							{
 								e.Handled = true;
 
-								if (e.Mobile.Criminal)
+								/* Disabling Criminal status check
+                                if (e.Mobile.Criminal)
 								{
 									// I will not do business with a criminal!
 									vendor.Say(500389);
 									break;
 								}
+                                */
 
 								if (AccountGold.Enabled && e.Mobile.Account is Account)
 								{
@@ -412,12 +158,14 @@ namespace Server.Mobiles
 							{
 								e.Handled = true;
 
-								if (e.Mobile.Criminal)
+								/* Disabling Criminal status check
+                                if (e.Mobile.Criminal)
 								{
 									// Thou art a criminal and cannot access thy bank box.
 									vendor.Say(500378);
 									break;
 								}
+                                */
 
 								e.Mobile.BankBox.Open();
 							}
@@ -426,12 +174,14 @@ namespace Server.Mobiles
 							{
 								e.Handled = true;
 
+                                /* Disabling Criminal status check
 								if (e.Mobile.Criminal)
 								{
 									// I will not do business with a criminal!
 									vendor.Say(500389);
 									break;
 								}
+                                */
 
 								if (AccountGold.Enabled && e.Mobile.Account != null)
 								{
@@ -491,21 +241,8 @@ namespace Server.Mobiles
 				}
 			}
 	    }
+#endregion
 
-	    public override void AddCustomContextEntries(Mobile from, List<ContextMenuEntry> list)
-        {
-            if (from.Alive)
-            {
-                var entry = new OpenBankEntry(this);
-
-                entry.Enabled = from.Map.Rules == MapRules.FeluccaRules || CheckVendorAccess(from);
-
-                list.Add(entry);
-            }
-
-            base.AddCustomContextEntries(from, list);
-        }
-*/
         public override void Serialize(GenericWriter writer)
         {
             base.Serialize(writer);
