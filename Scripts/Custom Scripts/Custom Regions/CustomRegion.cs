@@ -344,6 +344,12 @@ namespace Server.Regions
 
         public override bool OnMoveInto(Mobile m, Direction d, Point3D newLocation, Point3D oldLocation)
         {
+            // Owner can always enter a Custom Region
+            if (m.AccessLevel == AccessLevel.Owner)
+            {
+                return true;
+            }
+
             if (!m_Controller.CanEnter && !this.Contains(oldLocation))
             {
                 m.SendMessage("You cannot enter this area.");
