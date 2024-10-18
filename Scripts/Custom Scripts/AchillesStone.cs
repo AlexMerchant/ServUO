@@ -65,6 +65,7 @@ namespace Server.Items
             }
         }
 
+        // TODO: Read custom properties into when being deserialized
         public override void Deserialize(GenericReader reader)
         {
             base.Deserialize(reader);
@@ -72,6 +73,7 @@ namespace Server.Items
             int version = reader.ReadInt();
         }
 
+        // TODO: Write custom properties into when being serialized
         public override void Serialize(GenericWriter writer)
         {
             base.Serialize(writer);
