@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.Tracing;
 using Server.Mobiles;
 
 namespace Server.Items
@@ -48,8 +49,9 @@ namespace Server.Items
                 else
                 {
                     m_IsOwned = true;
+                    this.OwnerAccessLevel = value.AccessLevel;
                 }
-            }
+        }
         }
 
         [CommandProperty(AccessLevel.Owner)]
@@ -82,12 +84,10 @@ namespace Server.Items
 
         public override void OnDoubleClick(Mobile pm_Clicker)
         {
-            // Checks if the AchillesStone already has an owner
+            // Checks if the AchillesStone already has an Owner; sets Clicker to Owner
             if (!IsOwned && !(Owner != null))
             {
                 this.Owner = pm_Clicker;
-                this.OwnerAccessLevel = pm_Clicker.AccessLevel;
-                this.IsOwned = true;
                 pm_Clicker.SendMessage("Your soul has been become bound to the stone.");
                 return;
             }
