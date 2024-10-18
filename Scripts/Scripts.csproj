@@ -276,15 +276,17 @@
     <Compile Include="Context Menus\TeachEntry.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Custom Scripts\AchillesStone.cs" />
     <Compile Include="Custom Scripts\Custom NPCs\FisherSmith.cs" />
     <Compile Include="Custom Scripts\Custom NPCs\SRBanker.cs" />
-    <Compile Include="Custom Scripts\Custom Regions in a Box V4.0\CustomRegion.cs" />
-    <Compile Include="Custom Scripts\Custom Regions in a Box V4.0\RegionBounds.cs" />
-    <Compile Include="Custom Scripts\Custom Regions in a Box V4.0\RegionControl.cs" />
-    <Compile Include="Custom Scripts\Custom Regions in a Box V4.0\RegionControlGump.cs" />
-    <Compile Include="Custom Scripts\Custom Regions in a Box V4.0\RemoveAreaGump.cs" />
-    <Compile Include="Custom Scripts\Custom Regions in a Box V4.0\RestrictGump.cs" />
-    <Compile Include="Custom Scripts\SkillResetMoongate.cs" />
+    <Compile Include="Custom Scripts\Custom Regions\CustomRegion.cs" />
+    <Compile Include="Custom Scripts\Custom Regions\RegionBounds.cs" />
+    <Compile Include="Custom Scripts\Custom Regions\RegionControl.cs" />
+    <Compile Include="Custom Scripts\Custom Regions\RegionControlGump.cs" />
+    <Compile Include="Custom Scripts\Custom Regions\RemoveAreaGump.cs" />
+    <Compile Include="Custom Scripts\Custom Regions\RestrictGump.cs" />
+    <Compile Include="Custom Scripts\Skill Gates\MaxSkillGate.cs" />
+    <Compile Include="Custom Scripts\Skill Gates\SkillResetGate.cs" />
     <Compile Include="Deprecated\GamblingStone.cs" />
     <Compile Include="Deprecated\GMStone.cs" />
     <Compile Include="Gumps\AddCustomizableMessageGump.cs" />
@@ -12279,7 +12281,7 @@
     <Compile Include="VendorInfo\VendorInventory.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Custom Scripts\Custom Regions in a Box V4.0\CustomRegions V4.0 Changelog.txt" />
+    <Content Include="Custom Scripts\Custom Regions\CustomRegions V4.0 Changelog.txt" />
     <Content Include="Services\LootGeneration\RunicReforging\ReadMe.txt" />
     <Content Include="Services\New Magincia\ReadMe.txt" />
     <Content Include="Services\Revamped Dungeons\DespiseRevamped\Read Me.txt" />
@@ -12297,7 +12299,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Custom Scripts\Custom Regions in a Box V4.0\RegionControl_org.rar" />
+    <None Include="Custom Scripts\Custom Regions\RegionControl_org.rar" />
     <None Include="Services\TreasureMaps\desktop.ini" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSHARP.targets" />
