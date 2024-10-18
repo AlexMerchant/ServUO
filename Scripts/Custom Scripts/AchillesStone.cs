@@ -15,7 +15,20 @@ namespace Server.Items
             get { return m_IsOwned; }
             set
             {
-                m_IsOwned = value;
+                // Prevents m_IsOwned from being set to 'true' if m_Owner is 'null' and vice-versa
+                if (value && this.m_Owner == null)
+                {
+                    m_IsOwned = false;
+
+                }
+                else if (!value && this.m_Owner != null)
+                {
+                    m_IsOwned = true;
+                }
+                else
+                {
+                    m_IsOwned = value;
+                }
             }
         }
 
@@ -25,7 +38,17 @@ namespace Server.Items
             get { return m_Owner; }
             set
             {
-                m_Owner = value;
+                this.m_Owner = value;
+
+                if (value == null)
+                {
+                    this.IsOwned = false;
+                    this.OwnerAccessLevel = AccessLevel.Player;
+                }
+                else
+                {
+                    m_IsOwned = true;
+                }
             }
         }
 
@@ -41,7 +64,7 @@ namespace Server.Items
             : base(0x3192) // ItemID: 12690
         {
             Name = "a stone of mortality";
-            IsOwned = false;
+
         }
 
         [Constructable]
@@ -51,19 +74,45 @@ namespace Server.Items
 
         }
 
-        public override void OnDoubleClick(Mobile from)
+        // TODO: Method to check if the stone clicker is the stone owner
+        private bool IsUserOwner(Mobile m_Owner, Mobile pm_User)
         {
-            from.SendMessage("Serial: {0} / Mobile: {1}", from.Serial.Value, from);
+            return m_Owner.Equals(pm_User);
+        }
 
+        public override void OnDoubleClick(Mobile pm_Clicker)
+        {
             // Checks if the AchillesStone already has an owner
             if (!IsOwned && !(Owner != null))
             {
-                this.Owner = from;
-                this.OwnerAccessLevel = from.AccessLevel;
+                this.Owner = pm_Clicker;
+                this.OwnerAccessLevel = pm_Clicker.AccessLevel;
                 this.IsOwned = true;
-                from.SendMessage("Owner set");
+                pm_Clicker.SendMessage("Your soul has been become bound to the stone.");
+                return;
+            }
+
+            // TODO: Check if 'pm_Clicker' is 'm_Owner'; wrap this around rest of method
+            if (IsUserOwner(this.Owner, pm_Clicker))
+            {
+                // If the registered owner's current AccessLevel is the same as the stored AccessLevel on the stone, then toggle the owner's AccessLevel to Player
+                if (m_OwnerAccessLevel.Equals(pm_Clicker.AccessLevel))
+                {
+                    pm_Clicker.AccessLevel = AccessLevel.Player;
+                    return;
+                }
+
+                // If the AccessLevel comparison above returns false, then toggle the owner's AccessLevel to Player.
+                pm_Clicker.AccessLevel = m_OwnerAccessLevel;
+
+            } else // 'pm_Clicker' is not 'm_Owner'
+            {
+                pm_Clicker.SendMessage("You squeeze the stone and nothing happens. Stupid rock.");
+                return;
             }
         }
+
+        // TODO: Add method to handle attempts to move item; if stone is owned the mover must be the Owner
 
         // TODO: Read custom properties into when being deserialized
         public override void Deserialize(GenericReader reader)
@@ -71,6 +120,10 @@ namespace Server.Items
             base.Deserialize(reader);
 
             int version = reader.ReadInt();
+
+            m_IsOwned = reader.ReadBool();
+            m_Owner = reader.ReadMobile();
+            m_OwnerAccessLevel = (AccessLevel) reader.ReadInt();
         }
 
         // TODO: Write custom properties into when being serialized
@@ -79,6 +132,10 @@ namespace Server.Items
             base.Serialize(writer);
 
             writer.Write((int)0); // version
+
+            writer.Write(m_IsOwned);
+            writer.Write(m_Owner);
+            writer.Write((int)m_OwnerAccessLevel);
         }
     }
 }
